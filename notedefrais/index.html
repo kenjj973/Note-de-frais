@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de Note de Frais - Les Troglos</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+    <div id="note-frais-page" class="main-container">
+        
+        <header class="form-header">
+            <div class="logo-area">
+                <img src="logo.png" alt="Logo Clan Spéléo des Troglodytes" class="asso-logo" onerror="this.style.display='none'">
+            </div>
+            <div class="title-area">
+                <div class="main-title">NOTE DE FRAIS</div>
+                <div class="header-notes">
+                    Merci d'éviter au maximum les notes de frais, et de privilégier les règlements directs tant que possible.<br>
+                    Le club a la possibilité de payer par virement, prélèvement et par Paypal.<br>
+                    Vous pouvez vous rapprocher du trésorier pour toute question.
+                </div>
+            </div>
+        </header>
+
+        <section class="section-demandeur form-box">
+            <div class="field-group">
+                <label for="nom">Nom de l'employer :</label>
+                <input type="text" id="nom" name="nom" class="input-line">
+            </div>
+            <div class="field-group">
+                <label for="date_demande">Date de la demande :</label>
+                <input type="date" id="date_demande" name="date_demande" class="input-line">
+            </div>
+            <div class="field-group reason-group">
+                <label for="raison">Raison de la dépense :</label>
+                <textarea id="raison" name="raison" rows="3" class="input-line" placeholder="Ex : WE Ardèche 02/2022, Achat de matériel, Sortie Initiation, etc."></textarea>
+            </div>
+            <div class="field-group">
+                <label for="budget">Budget :</label>
+                <select id="budget" name="budget" class="input-line">
+                    <option value="administratif">Administratif</option>
+                    <option value="materiel">Matériel</option>
+                    <option value="sortie">Sortie</option>
+                    <option value="evenement">Événement</option>
+                </select>
+            </div>
+        </section>
+
+        <section class="section-regles">
+            <p><strong>Joindre obligatoirement un scan ou les originaux des justificatifs</strong> (factures, tickets, détail des comptes...).</p>
+            <p class="text-warning">Seules les dépenses avec justificatifs pourront être remboursées <span class="text-small">(un ticket de carte bleue n'est pas un justificatif)</span></p>
+        </section>
+
+        <section class="section-tableau form-box">
+            <table id="table-frais">
+                <thead>
+                    <tr>
+                        <th class="col-date">Date <span class="text-small">de la dépense</span></th>
+                        <th class="col-objet">Objet de la dépense</th>
+                        <th class="col-km">Km <span class="text-small">effectués</span></th>
+                        <th class="col-transports">Péages, autres transports</th>
+                        <th class="col-autres">Autres</th>
+                        <th class="col-actions no-print">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="frais-tbody">
+                    </tbody>
+            </table>
+            <button type="button" id="btn-add-line" class="btn-secondary no-print" onclick="ajouterLigneFrais()">+ Ajouter une ligne de frais</button>
+        </section>
+
+        <section class="section-totaux form-box">
+            <div class="km-rate">Barème kilométrique : <strong>0.606 € / km</strong></div>
+            
+            <div class="totals-area">
+                <p>TOTAL frais kilométriques : <span id="total-calcul-km" class="calc-val">0.00</span> €</p>
+                <p>Total péages et transports : <span id="total-cat-peage" class="calc-val">0.00</span> €</p>
+                <p>Total autres : <span id="total-cat-autres" class="calc-val">0.00</span> €</p>
+            </div>
+ 
+            <div class="grand-total-box">
+                TOTAL des frais : <span id="total-general" class="calc-val">0.00</span> €
+            </div>
+        </section>
+ 
+        <section class="section-choix-reglement form-box">
+            
+            <div class="option-reglement">
+                <input type="radio" id="mode-abandon" name="mode_reglement" value="abandon" checked onclick="toggleOptionReglement('abandon')">
+                <label for="mode-abandon" class="option-label">ABANDON DE FRAIS</label>
+                
+                <div id="details-abandon" class="options-details active">
+                    <p class="legis-text">Il vous est possible de faire don au CST du total ou d'une partie de cette somme.<br>
+                    <span class="text-small">Dans ce cas, conformément à l'article 41 de la loi 2000-627 du 6 juillet 2000 modifiant la loi du 16 juillet 1984... vous bénéficierez d'une réduction d'impôts égale à 66% de la somme concernée (dans la limite de 20% du revenu imposable).</span></p>
+                    
+                    <div class="field-group">
+                        <label>J'abandonne le remboursement de la somme de :</label>
+                        <input type="number" id="input-somme-abandon" class="input-line calc-val" value="0" step="0.01" oninput="calculerDonFiscal()"> €
+                    </div>
+                    <p>Après déduction d'impôts, le montant réel dépensé sera de : <span id="cout-reel-apres-don" class="calc-val">0.00</span> €</p>
+                </div>
+            </div>
+ 
+            <hr class="separator">
+ 
+            <div class="option-reglement">
+                <input type="radio" id="mode-remboursement" name="mode_reglement" value="remboursement" onclick="toggleOptionReglement('remboursement')">
+                <label for="mode-remboursement" class="option-label">REMBOURSEMENT</label>
+                
+                <div id="details-remboursement" class="options-details">
+                    <p>Je souhaite que le CST me rembourse : <span id="somme-remboursement" class="calc-val">0.00</span> €</p>
+                    <div class="bank-details field-group">
+                        <label for="input-iban">Sur le compte - IBAN :</label>
+                        <input type="text" id="input-iban" name="iban" class="input-line">
+                    </div>
+                    <div class="bank-details field-group">
+                        <label for="input-bic">BIC :</label>
+                        <input type="text" id="input-bic" name="bic" class="input-line">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="form-footer">
+            <div class="signature-wrap form-box">
+    <label>Signature du demandeur :</label>
+    <!-- Le "papiers" pour dessiner -->
+    <canvas id="signature-pad" width="450" height="150"></canvas>
+    
+    <div class="no-print" style="margin-top: 5px;">
+        <button type="button" onclick="effacerSignature()" style="font-size: 12px; cursor: pointer;">
+            Recommencer
+        </button>
+    </div>
+</div>
+            <div class="final-info">
+                Formulaire à transmettre avec tous les justificatifs<br>
+                en un fichier PDF à **tresorier@troglos.fr**
+            </div>
+        </footer>
+
+    </div> <div class="action-bar no-print">
+        <button type="button" class="btn-primary" onclick="validerEtGenerer()">Enregistrer et Générer le PDF</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

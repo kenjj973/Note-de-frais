@@ -1,0 +1,200 @@
+/* style.css */
+
+/* --- RÈGLES GLOBALES --- */
+body {
+    font-family: Arial, sans-serif;
+    color: #333;
+    background-color: #f7f9fc;
+    margin: 0;
+    padding: 20px;
+}
+
+/* Modification : Ajout de background white et suppression du shadow pour le PDF */
+.main-container {
+    background-color: #fff;
+    width: 210mm; /* Largeur A4 portrait */
+    min-height: 297mm; /* Hauteur A4 portrait */
+    margin: 0 auto;
+    padding: 15mm;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+    position: relative;
+}
+
+/* --- MISE EN PAGE ET STYLES COMMUNS --- */
+h1, .main-title {
+    font-size: 22px; /* Légèrement réduit pour éviter les débordements */
+    font-weight: bold;
+    text-align: center;
+    border: 2px solid green;
+    padding: 10px;
+    text-transform: uppercase;
+}
+
+.form-box {
+    border: 1px solid #c0c0c0;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.field-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.field-group label {
+    font-weight: bold;
+    margin-right: 15px;
+    min-width: 170px;
+}
+
+.input-line {
+    border: none;
+    border-bottom: 1px solid #ccc;
+    padding: 5px;
+    flex-grow: 1;
+    font-size: 14px;
+    background: transparent;
+}
+
+textarea.input-line {
+    border: 1px solid #ccc;
+    resize: none; /* Évite que l'utilisateur déforme le formulaire */
+}
+
+/* --- EN-TÊTE --- */
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 3px solid green;
+    padding-bottom: 15px;
+}
+
+.title-area {
+    width: 70%;
+}
+
+.asso-logo {
+    max-width: 120px;
+    max-height: 120px;
+    object-fit: contain;
+}
+
+.header-notes {
+    font-size: 11px;
+    font-style: italic;
+    color: #555;
+    margin-top: 10px;
+}
+
+/* --- TEXTES D'AVERTISSEMENT --- */
+.section-regles {
+    font-size: 12px;
+    margin-bottom: 20px;
+    border-left: 5px solid red;
+    padding-left: 15px;
+    background-color: #fff5f5;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.text-warning {
+    color: red;
+    font-weight: bold;
+}
+
+/* --- TABLEAU DYNAMIQUE --- */
+#table-frais {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px; /* Un peu plus petit pour le PDF */
+    margin-bottom: 15px;
+    table-layout: fixed; /* Force le respect des largeurs de colonnes */
+}
+
+#table-frais th, #table-frais td {
+    border: 1px solid #c0c0c0;
+    padding: 8px;
+    text-align: left;
+    word-wrap: break-word;
+}
+
+#table-frais th {
+    background-color: #f2f2f2 !important; /* Force la couleur au rendu PDF */
+    -webkit-print-color-adjust: exact;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+#table-frais input {
+    border: none;
+    width: 100%;
+    background: transparent;
+}
+
+/* --- TOTAUX --- */
+.section-totaux {
+    text-align: right;
+    margin-top: 10px;
+}
+
+.grand-total-box {
+    font-size: 18px;
+    font-weight: bold;
+    color: green;
+    border: 2px solid green;
+    padding: 10px;
+    margin-top: 10px;
+    display: inline-block;
+}
+
+/* --- SIGNATURE --- */
+.signature-wrap {
+    margin-top: 20px;
+    padding: 10px;
+    background: #fdfdfd;
+    border: 1px dashed #ccc;
+    display: inline-block;
+}
+
+#signature-pad {
+    border: 1px solid #999;
+    background-color: #fff;
+    cursor: crosshair;
+    touch-action: none;
+}
+
+/* --- BOUTONS ET ACTIONS --- */
+.action-bar {
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 40px;
+}
+
+/* --- OPTIMISATION POUR LE PDF (RÈGLES CRITIQUES) --- */
+
+/* Masquer les éléments inutiles sur le document final */
+.no-print, .btn-delete, .btn-secondary, .action-bar, .btn-primary {
+    display: none !important;
+}
+
+/* Empêcher les coupures d'éléments au milieu d'une page */
+tr, .form-box, .section-totaux, .signature-wrap {
+    page-break-inside: avoid;
+}
+
+/* Assurer que les bordures et couleurs s'affichent sur le PDF */
+* {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Style spécifique pour les champs quand ils sont imprimés */
+@media print {
+    body { background: white; padding: 0; }
+    .main-container { box-shadow: none; margin: 0; border: none; }
+    .input-line { border-bottom: 1px solid #eee; }
+}
